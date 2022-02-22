@@ -3,43 +3,41 @@ import { useState } from "react"
 
 export default function Home() {
   const [amountToSpend, setAmountToSpend] = useState(20000)
-  const [items, setItems] = useState([
-    { title: "Tesla", price: 1000, amount: 0, img: "./tesla.jpeg" },
-    { title: "Airpod", price: 200, amount: 0, img: "./airpod.png" },
-    { title: "item 3", price: 300, amount: 0, img: "islan.png" },
-    { title: "item 4", price: 400, amount: 0, img: "cow.png" },
-  ])
+  const [items, setItems] = useState({
+    1: { title: "Tesla", price: 1000, amount: 0, img: "./tesla.jpeg" },
+    2: { title: "Airpod", price: 200, amount: 0, img: "./airpod.png" },
+    3: { title: "Een eiland", price: 300, amount: 0, img: "islan.png" },
+    4: { title: "10000 koeien", price: 400, amount: 0, img: "cow.png" },
+  })
 
   const reset = () => {
     setAmountToSpend(20000)
-
     const copyOfItems = items
-
-    copyOfItems.forEach(item => {
-      item.amount = 0
+    Object.keys(copyOfItems).map(keyName => {
+      copyOfItems[keyName].amount = 0
     })
     setItems(copyOfItems)
   }
 
-  const buy = (index, price) => {
-    const newAmountToSpend = amountToSpend - price
-    setAmountToSpend(newAmountToSpend)
-    const itemToChange = items[index]
-    const copyAmount = items[index].amount + 1
-    const newItem = { ...itemToChange, amount: copyAmount }
-    const copyOfItems = [...items]
-    copyOfItems[index] = newItem
+  const buy = (theOne, price) => {
+    setAmountToSpend(prevAmount => prevAmount - price)
+    const copyOfItems = items
+    Object.keys(copyOfItems).map(keyName => {
+      keyName === theOne
+        ? (copyOfItems[keyName].amount += 1)
+        : copyOfItems[keyName].amount
+    })
     setItems(copyOfItems)
   }
 
-  const sell = (index, price) => {
-    const newAmountToSpend = amountToSpend + price
-    setAmountToSpend(newAmountToSpend)
-    const itemToChange = items[index]
-    const newAmountItem = itemToChange.amount - 1
-    const newItem = { ...itemToChange, amount: newAmountItem }
-    const copyOfItems = [...items]
-    copyOfItems[index] = newItem
+  const sell = (theOne, price) => {
+    setAmountToSpend(prevAmount => prevAmount + price)
+    const copyOfItems = items
+    Object.keys(copyOfItems).map(keyName => {
+      keyName === theOne
+        ? (copyOfItems[keyName].amount -= 1)
+        : copyOfItems[keyName].amount
+    })
     setItems(copyOfItems)
   }
   return (
@@ -49,27 +47,31 @@ export default function Home() {
         Reset
       </button>
       <div className={styles.container}>
-        {items.map(({ title, price, amount, img }, index) => (
-          <div className={styles.item} key={index}>
+        {Object.keys(items).map(keyName => (
+          <div className={styles.item} key={keyName}>
             <div className={styles.item__image}>
-              <img src={img} className={styles.image} />
+              <img src={items[keyName].img} className={styles.image} />
             </div>
             <div className={styles.item__content}>
               <div className={styles.item__content_title}>
-                <h1>{title}</h1>
-                <h3> &euro;{price}</h3>
+                <h1>{items[keyName].title}</h1>
+                <h3> &euro;{items[keyName].price}</h3>
               </div>
               <div className={styles.item__content_function}>
                 <button
-                  disabled={amount === 0}
-                  onClick={() => sell(index, price)}
+                  disabled={items[keyName].amount === 0}
+                  onClick={() => sell(keyName, items[keyName].price)}
                   className="btn sell"
                 >
-                  Sell
+                  -
                 </button>
-                <span>{amount}</span>
-                <button className="btn buy" onClick={() => buy(index, price)}>
-                  Buy
+                <span>{items[keyName].amount}</span>
+                <button
+                  className="btn buy"
+                  onClick={() => buy(keyName, items[keyName].price)}
+                  disabled={items[keyName].price > amountToSpend}
+                >
+                  +
                 </button>
               </div>
             </div>
